@@ -8,8 +8,8 @@ const components = await getCollection("components");
 // to { 'component-1': { title: 'Component 1', description: 'Description' } }
 const pages = Object.fromEntries(
   components.map(({ data }) => [
-    [data.Slug],
-    { title: data.Name, description: data.Description },
+    data.slug,
+    { title: data.name, description: data.purpose },
   ]),
 );
 

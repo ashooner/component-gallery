@@ -16,7 +16,7 @@ const HomeLinkWrapper = currentPath === "" ? "h1" : "div";
     class="flex-grow col-span-8 md:col-span-12 xl:col-span-4 p-4 pr-0 sm:pr-4 flex items-end bg-background-primary"
   >
     <a href="/" class="font-serif text-2xl leading-none" data-astro-prefetch
-      >The Component Gallery</a
+      >Higher-Ed Components</a
     >
   </HomeLinkWrapper>
   <!-- Search -->
@@ -33,6 +33,16 @@ const HomeLinkWrapper = currentPath === "" ? "h1" : "div";
     class="flex-grow col-span-12 md:col-span-6 xl:col-span-4 p-4 xl:pt-6 flex md:items-end md:justify-end bg-background-primary border-fade-l border-fade-r xl:before:hidden xl:after:hidden"
   >
     <ul class="w-full flex justify-between text-base leading-6">
+      <li>
+        <a
+          href="/resources"
+          class:list={[
+            "uppercase tracking-wide variable-font-wdth-83",
+            currentPath === "resources" ? "here" : null,
+          ]}
+          data-astro-prefetch>Evidence</a
+        >
+      </li>
       <li>
         <a
           href="/components"
@@ -60,7 +70,7 @@ const HomeLinkWrapper = currentPath === "" ? "h1" : "div";
             "uppercase tracking-wide variable-font-wdth-83",
             currentPath === "about" ? "here" : null,
           ]}
-          data-astro-prefetch>About</a
+          data-astro-prefetch>Method</a
         >
       </li>
     </ul>

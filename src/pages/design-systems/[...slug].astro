@@ -1,49 +1,52 @@
 ---
 import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import InventoryCard from "../../components/InventoryCard.astro";
+import StatusBadge from "../../components/StatusBadge.astro";
 
-// 1. Generate a new path for every collection entry
 export async function getStaticPaths() {
-  // Get all published components
-  const components = await getCollection("designSystems", ({ data }) => {
-    return data["Publish"] === true;
-  });
-
-  return components.map((entry) => ({
-    params: { slug: entry.data["Slug"] },
-    props: { entry },
-  }));
+  return (await getCollection("designSystems")).map((entry) => ({ params: { slug: entry.data.slug }, props: { entry } }));
 }
-// 2. For your template, you can get the entry directly from the prop
+
 const { entry } = Astro.props;
+const examples = (await getCollection("componentExamples")).filter(({ data }) => data.designSystem === entry.id);
+const components = await getCollection("components");
+const resources = (await getCollection("resources")).filter(({ data }) => data.designSystem === entry.id);
+const conceptById = Object.fromEntries(components.map((component) => [component.id, component]));
 ---
-
-<!doctype html>
-<html lang="en">
-  <head>
-    <title>{entry.data["Name"]} | Design System</title>
-    <meta http-equiv="refresh" content={`0;url=${entry.data["URL"]}`} />
-    <meta name="robots" content="noindex" />
-    <link rel="canonical" href={entry.data["URL"]} />
-  </head>
-
-  <body data-pagefind-body hidden>
-    <h1>
-      {entry.data["Name"]}
-    </h1>
-    {
-      !!entry.data["Organisation"] && (
-        <p>Organisation: {entry.data["Organisation"]}</p>
-      )
-    }
-    {
-      !!entry.data["Tech lookup"]?.length && (
-        <p>Tech: {entry.data["Tech lookup"].join(", ")}</p>
-      )
-    }
-    {
-      !!entry.data["Features lookup"]?.length && (
-        <p>Features: {entry.data["Features lookup"].join(", ")}</p>
-      )
-    }
-  </body>
-</html>
+<BaseLayout title={entry.data.name} description={`${entry.data.university} component-library inventory`}>
+  <section class="col-span-full grid grid-cols-subgrid bg-background-primary shadow-border" data-pagefind-body>
+    <div class="col-span-full lg:col-span-8 p-[var(--grid-display-size)]">
+      <p class="uppercase tracking-wide text-xs">{entry.data.university}</p>
+      <h1 class="font-serif text-[calc(var(--grid-display-size)*3)] leading-none mt-3">{entry.data.name}</h1>
+      <p class="text-xl mt-5">{entry.data.notes}</p>
+    </div>
+    <dl class="col-span-full lg:col-span-4 bg-background-secondary p-4 text-sm space-y-3">
+      <div><dt class="uppercase text-xs tracking-wide">Library</dt><dd><code>{entry.data.library}</code></dd></div>
+      <div><dt class="uppercase text-xs tracking-wide">Version</dt><dd>{entry.data.version}</dd></div>
+      <div><dt class="uppercase text-xs tracking-wide">Technology</dt><dd>{entry.data.technologies.join(" · ")}</dd></div>
+      <div><dt class="uppercase text-xs tracking-wide">Groups</dt><dd>{entry.data.researchGroups.join(" · ")}</dd></div>
+      <div><dt class="uppercase text-xs tracking-wide">Retrieved</dt><dd>{entry.data.retrieved.toISOString().slice(0,10)}</dd></div>
+      <div><dt class="uppercase text-xs tracking-wide">Status</dt><dd><StatusBadge status={entry.data.status} /></dd></div>
+    </dl>
+  </section>
+  <section class="col-span-full bg-background-primary shadow-border">
+    <div class="p-4"><h2 class="font-serif text-2xl">Documented implementations</h2><p class="text-sm mt-1">{examples.length} in the initial inventory</p></div>
+    <ul class="grid grid-cols-12 gap-px" role="list">{examples.map((example) => <InventoryCard
+      href={`/implementations/${example.data.slug}`}
+      eyebrow={`${conceptById[example.data.canonicalComponent]?.data.name} · ${example.data.implementationType}`}
+      title={example.data.sourceName}
+      description={example.data.summary}
+      tags={[...example.data.variantDimensions.map(({ name }) => name), ...example.data.states.map(({ name }) => name)].slice(0,5)}
+    />)}</ul>
+  </section>
+  <section class="col-span-full p-4 bg-background-primary shadow-border" data-pagefind-body>
+    <h2 class="font-serif text-2xl">Documentation and evidence</h2>
+    <ul class="mt-4 grid sm:grid-cols-2 gap-3">
+      <li class="border border-border-primary p-3"><a class="underline font-medium" href={entry.data.documentationUrl}>Primary documentation</a></li>
+      {entry.data.sourceUrl && <li class="border border-border-primary p-3"><a class="underline font-medium" href={entry.data.sourceUrl}>Source repository</a></li>}
+      {entry.data.integrationUrls.map((url) => <li class="border border-border-primary p-3"><a class="underline font-medium" href={url}>Integration source</a></li>)}
+      {resources.map((resource) => <li class="border border-border-primary p-3"><div class="flex justify-between gap-2"><a class="underline font-medium" href={resource.data.url}>{resource.data.name}</a><StatusBadge status={resource.data.status} /></div><p class="text-sm mt-2">{resource.data.type} · {resource.data.version}</p>{resource.data.commit && <p class="font-mono text-xs break-all mt-1">{resource.data.commit}</p>}</li>)}
+    </ul>
+  </section>
+</BaseLayout>

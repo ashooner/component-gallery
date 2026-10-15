@@ -1,38 +1,19 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Hero from "../components/Hero.astro";
-import TOC from "../components/TOC.astro";
-
-import { getEntry } from "astro:content";
-
-const aboutPage = await getEntry("miscContent", "about");
-
-const content = aboutPage ?? {
-  render: async () => ({ Content: "", headings: [] }),
-};
-const { Content: MainContent, headings } = await content.render();
 ---
-
-<BaseLayout title="About">
-  <Hero>
-    <span>About</span>
-  </Hero>
-
-  <div class="col-span-full grid grid-cols-subgrid">
-    <!-- Table of contents -->
-    <div
-      class="col-span-full md:col-span-3 row-span-full bg-background-primary shadow-border"
-    >
-      <TOC headings={headings} />
-    </div>
-    {
-      !!MainContent && (
-        <div class="col-span-full md:col-span-9 bg-background-primary text-base variable-font-wdth-90 z-10 shadow-border">
-          <div class="body-text body-text--constrain-width p-4 text-base variable-font-wdth-90">
-            <MainContent />
-          </div>
-        </div>
-      )
-    }
-  </div>
+<BaseLayout title="Research method">
+  <Hero><span>Research method</span></Hero>
+  <article class="col-span-full bg-background-primary p-[var(--grid-display-size)] shadow-border body-text body-text--constrain-width" data-pagefind-body>
+    <h2>Concepts and source APIs are different records</h2>
+    <p>Canonical concepts describe shared purpose, anatomy, aliases, and relationships. Implementations preserve each source library’s exact component name and declarations. A mapping connects the two without normalizing away source-specific meaning.</p>
+    <h2>Evidence status</h2>
+    <p><strong>Verified</strong> means a claim is explicit in primary documentation or source. <strong>Inferred</strong> means the claim follows from inspected code or examples but is not stated directly. <strong>Unknown</strong> means the inspected material does not establish the answer. Unknown is not a synonym for unsupported.</p>
+    <h2>Independent dimensions</h2>
+    <p>Variant dimensions, named presets, states, responsive behavior, conditional requirements, and composition constraints are recorded separately. This avoids flattening different kinds of behavior into one ambiguous “variants” field.</p>
+    <h2>Scope</h2>
+    <p>The first pass covers Ohio State BUX, YaleSites, the Illinois Web Toolkit, and the UMD Design System, beginning with Card, Hero, Accordion, Navigation, and Image + Text where verified implementations exist. Missouri, Texas, Louisville, Stanford, Emory, and Mississippi State are planned as SEC, Kentucky-region, and aspirational research groups.</p>
+    <h2>Not a specification</h2>
+    <p>This inventory is descriptive. A future UK higher-education component specification must be a separate selection profile with explicit inclusion decisions; this inventory does not imply those decisions.</p>
+  </article>
 </BaseLayout>

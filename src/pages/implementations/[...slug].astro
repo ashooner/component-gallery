@@ -1,0 +1,74 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import StatusBadge from "../../components/StatusBadge.astro";
+
+export async function getStaticPaths() {
+  return (await getCollection("componentExamples")).map((entry) => ({ params: { slug: entry.data.slug }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const systems = await getCollection("designSystems");
+const components = await getCollection("components");
+const system = systems.find(({ id }) => id === entry.data.designSystem)!;
+const concept = components.find(({ id }) => id === entry.data.canonicalComponent)!;
+---
+<BaseLayout title={entry.data.name} description={entry.data.summary}>
+  <article class="col-span-full bg-background-primary" data-pagefind-body>
+    <header class="grid grid-cols-12 gap-px shadow-border">
+      <div class="col-span-full lg:col-span-8 p-[var(--grid-display-size)]">
+        <p class="text-xs uppercase tracking-wider">Implementation detail · {entry.data.implementationType}</p>
+        <h1 class="font-serif text-[calc(var(--grid-display-size)*3)] leading-none mt-3">{entry.data.sourceName}</h1>
+        <p class="text-xl mt-5 max-w-3xl">{entry.data.summary}</p>
+      </div>
+      <dl class="col-span-full lg:col-span-4 p-4 bg-background-secondary text-sm space-y-3">
+        <div><dt class="uppercase text-xs tracking-wide">Canonical mapping</dt><dd><a class="underline" href={`/components/${concept.data.slug}`}>{concept.data.name}</a></dd></div>
+        <div><dt class="uppercase text-xs tracking-wide">Design system</dt><dd><a class="underline" href={`/design-systems/${system.data.slug}`}>{system.data.name}</a></dd></div>
+        <div><dt class="uppercase text-xs tracking-wide">Source name</dt><dd><code>{entry.data.sourceName}</code></dd></div>
+        <div><dt class="uppercase text-xs tracking-wide">Documentation</dt><dd><a class="underline" href={entry.data.documentationUrl}>Open primary documentation</a></dd></div>
+        {entry.data.sourceUrl && <div><dt class="uppercase text-xs tracking-wide">Source declaration</dt><dd><a class="underline" href={entry.data.sourceUrl}>Open pinned source</a></dd></div>}
+      </dl>
+    </header>
+
+    <section class="p-4 shadow-border overflow-x-auto">
+      <h2 class="font-serif text-2xl">Source API</h2>
+      <table class="detail-table mt-4">
+        <thead><tr><th>Kind</th><th>Exact name</th><th>Type</th><th>Allowed values</th><th>Required</th><th>Default</th><th>Description</th><th>Status</th></tr></thead>
+        <tbody>{entry.data.api.map((item) => <tr><td>{item.kind}</td><th><code>{item.name}</code></th><td>{item.type ?? "—"}</td><td>{item.values?.join(" · ") ?? "—"}</td><td>{item.required === undefined ? "Not stated" : item.required ? "Yes" : "No"}</td><td>{item.default ?? "—"}</td><td>{item.description}</td><td><StatusBadge status={item.status} /></td></tr>)}</tbody>
+      </table>
+    </section>
+
+    <div class="grid grid-cols-12 gap-px">
+      <section class="col-span-full lg:col-span-6 p-4 shadow-border">
+        <h2 class="font-serif text-2xl">Variant dimensions</h2>
+        {entry.data.variantDimensions.length ? <dl class="mt-4 space-y-4">{entry.data.variantDimensions.map((dimension) => <div><dt class="font-medium">{dimension.name} <code class="text-xs">{dimension.sourceName}</code></dt><dd class="mt-1">{dimension.values.join(" · ")} <StatusBadge status={dimension.status} /></dd></div>)}</dl> : <p class="mt-3">No variant dimension was documented in the inspected source. <StatusBadge status="unknown" /></p>}
+        <h3 class="uppercase tracking-wide text-sm mt-6">Named presets</h3>
+        <p class="mt-2">{entry.data.namedPresets.length ? entry.data.namedPresets.join(" · ") : "None documented in the inspected source."}</p>
+      </section>
+      <section class="col-span-full lg:col-span-6 p-4 shadow-border">
+        <h2 class="font-serif text-2xl">States</h2>
+        {entry.data.states.length ? <dl class="mt-4 space-y-4">{entry.data.states.map((state) => <div><dt class="font-medium">{state.name} <code class="text-xs">{state.sourceName}</code></dt><dd>{state.values.join(" · ")} <StatusBadge status={state.status} /></dd></div>)}</dl> : <p class="mt-3">No state API was documented in the inspected source. <StatusBadge status="unknown" /></p>}
+      </section>
+      <section class="col-span-full lg:col-span-4 p-4 shadow-border"><h2 class="font-serif text-2xl">Responsive behavior</h2><ul class="mt-3 space-y-3">{entry.data.responsiveBehavior.map((item) => <li>{item.description} <StatusBadge status={item.status} /></li>)}</ul></section>
+      <section class="col-span-full lg:col-span-4 p-4 shadow-border"><h2 class="font-serif text-2xl">Conditional requirements</h2><ul class="mt-3 space-y-3">{entry.data.conditionalRequirements.map((item) => <li><strong>{item.when}:</strong> {item.requires} <StatusBadge status={item.status} /></li>)}</ul></section>
+      <section class="col-span-full lg:col-span-4 p-4 shadow-border"><h2 class="font-serif text-2xl">Composition constraints</h2><ul class="mt-3 space-y-3">{entry.data.compositionConstraints.map((item) => <li>{item.rule} <StatusBadge status={item.status} /></li>)}</ul></section>
+    </div>
+
+    <section class="p-4 shadow-border">
+      <h2 class="font-serif text-2xl">Evidence</h2>
+      <ul class="mt-4 space-y-3">{entry.data.evidence.map((evidence) => <li class="border border-border-primary p-3">
+        <div class="flex flex-wrap justify-between gap-2"><a class="underline" href={evidence.url}>{evidence.url}</a><StatusBadge status={evidence.status} /></div>
+        <p class="text-sm mt-2">Version {evidence.version} · retrieved {evidence.retrieved.toISOString().slice(0, 10)}</p>
+        {evidence.commit && <p class="font-mono text-xs break-all mt-1">Commit {evidence.commit}</p>}
+        {evidence.note && <p class="text-sm mt-2">{evidence.note}</p>}
+      </li>)}</ul>
+    </section>
+  </article>
+</BaseLayout>
+
+<style>
+  .detail-table { width:100%; min-width:70rem; border-collapse:collapse; font-size:.82rem; }
+  .detail-table th,.detail-table td { border:1px solid theme("colors.border-primary"); padding:.6rem; text-align:left; vertical-align:top; }
+  .detail-table thead th { text-transform:uppercase; letter-spacing:.04em; font-size:.68rem; }
+  code { overflow-wrap:anywhere; }
+</style>

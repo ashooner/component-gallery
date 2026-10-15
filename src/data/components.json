@@ -1,0 +1,57 @@
+[
+  {
+    "id": "card",
+    "name": "Card",
+    "slug": "card",
+    "emoji": "▣",
+    "aliases": ["Content card", "Teaser", "Tile"],
+    "purpose": "Group related content and actions into a scannable, self-contained entry point.",
+    "anatomy": ["Container", "Heading", "Supporting content", "Optional media", "Optional action"],
+    "relationships": { "contains": ["image", "link", "button"], "relatedTo": ["image-text", "hero"] },
+    "selectionStatus": "inventory-only"
+  },
+  {
+    "id": "hero",
+    "name": "Hero",
+    "slug": "hero",
+    "emoji": "▰",
+    "aliases": ["Banner", "Masthead", "Page header"],
+    "purpose": "Establish a page's primary message with high visual and content emphasis.",
+    "anatomy": ["Headline", "Supporting text", "Optional eyebrow", "Optional media", "Optional actions"],
+    "relationships": { "contains": ["image", "video", "button"], "relatedTo": ["card", "navigation"] },
+    "selectionStatus": "inventory-only"
+  },
+  {
+    "id": "accordion",
+    "name": "Accordion",
+    "slug": "accordion",
+    "emoji": "≡",
+    "aliases": ["Collapsible sections", "Disclosure group"],
+    "purpose": "Let people progressively reveal sections of related content while retaining an overview.",
+    "anatomy": ["Group", "Item", "Trigger or summary", "Panel"],
+    "relationships": { "contains": ["heading", "button", "content"], "relatedTo": ["navigation"] },
+    "selectionStatus": "inventory-only"
+  },
+  {
+    "id": "navigation",
+    "name": "Navigation",
+    "slug": "navigation",
+    "emoji": "↗",
+    "aliases": ["Header navigation", "Menu", "Site navigation"],
+    "purpose": "Provide persistent routes through a site and access to high-priority utilities.",
+    "anatomy": ["Brand or site identity", "Primary links", "Optional utility links", "Optional search", "Responsive disclosure"],
+    "relationships": { "contains": ["link", "menu", "search"], "relatedTo": ["hero", "accordion"] },
+    "selectionStatus": "inventory-only"
+  },
+  {
+    "id": "image-text",
+    "name": "Image + Text",
+    "slug": "image-text",
+    "emoji": "◫",
+    "aliases": ["Text with Image", "Content spotlight", "Media object"],
+    "purpose": "Pair explanatory or promotional copy with supporting visual media.",
+    "anatomy": ["Image", "Heading", "Body", "Optional overline", "Optional links", "Optional caption"],
+    "relationships": { "contains": ["image", "link"], "relatedTo": ["card", "hero"] },
+    "selectionStatus": "inventory-only"
+  }
+]

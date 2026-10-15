@@ -16,8 +16,7 @@ interface Props {
 }
 
 const { title, description, shareImage } = Astro.props;
-const isProduction = import.meta.env.PROD;
-const siteUrl = Astro.site ?? new URL("https://component.gallery");
+const siteUrl = Astro.site ?? new URL("https://example.invalid");
 ---
 
 <!doctype html>
@@ -56,11 +55,11 @@ const siteUrl = Astro.site ?? new URL("https://component.gallery");
     <slot name="page-meta">
       <SEO
         title={title
-          ? `${title} | The Component Gallery`
-          : "The Component Gallery"}
+          ? `${title} | Higher-Ed Component Inventory`
+          : "Higher-Ed Component Inventory"}
         description={description
           ? description
-          : "An up-to-date repository of interface components based on examples from the world of design systems, designed to be a reference for anyone building user interfaces."}
+            : "A version-controlled higher-education component inventory with exact source APIs and evidence."}
         canonical={new URL(Astro.url.pathname, siteUrl).toString()}
         openGraph={{
           basic: {
@@ -105,15 +104,6 @@ const siteUrl = Astro.site ?? new URL("https://component.gallery");
 
       document.documentElement.dataset.modifierKey = modifierKey;
     </script>
-    {
-      isProduction && (
-        <script
-          defer
-          data-domain="component.gallery"
-          src="https://plausible.io/js/script.outbound-links.js"
-        />
-      )
-    }
   </head>
   <body id="body">
     <div class="bg-background-primary relative z-10 shadow-border">

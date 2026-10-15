@@ -200,7 +200,7 @@ const Search = () => {
             <input
               id="search-input"
               type="text"
-              placeholder="Search components and design systems…"
+              placeholder="Search concepts, systems, implementations, and evidence…"
               onFocus={handleFocus}
               onInput={handleSearch}
               onKeyDown={handleKeyDown}
@@ -251,9 +251,13 @@ const Search = () => {
                   </p>
                   <span class="px-1.5 py-1 text-sm variable-font-wdth-90 leading-none border border-dotted rounded shrink-0 relative -right-2">
                     {result.url.startsWith("/components/")
-                      ? "Component"
+                      ? "Concept"
+                      : result.url.startsWith("/implementations/")
+                        ? "Implementation"
                       : result.url.startsWith("/design-systems/")
                         ? "Design system"
+                        : result.url.startsWith("/resources")
+                          ? "Evidence"
                         : ""}
                   </span>
                 </div>

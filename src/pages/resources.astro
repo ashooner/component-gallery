@@ -1,0 +1,18 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Hero from "../components/Hero.astro";
+import StatusBadge from "../components/StatusBadge.astro";
+const resources = (await getCollection("resources")).sort((a,b) => a.data.name.localeCompare(b.data.name));
+const systems = await getCollection("designSystems");
+const systemById = Object.fromEntries(systems.map((system) => [system.id, system.data.name]));
+---
+<BaseLayout title="Research sources" description="Documentation, source repositories, integration evidence, versions, commits, and retrieval dates.">
+  <Hero><span>Research sources and evidence</span></Hero>
+  <div class="col-span-full overflow-x-auto bg-background-primary p-4 shadow-border" data-pagefind-body>
+    <table class="resource-table"><thead><tr><th>Source</th><th>System</th><th>Type</th><th>Version / commit</th><th>Retrieved</th><th>Status</th></tr></thead><tbody>{resources.map((resource) => <tr><th><a href={resource.data.url}>{resource.data.name}</a><p>{resource.data.notes}</p></th><td>{resource.data.designSystem ? systemById[resource.data.designSystem] : "Cross-system"}</td><td>{resource.data.type}</td><td>{resource.data.version}{resource.data.commit && <code>{resource.data.commit}</code>}</td><td>{resource.data.retrieved.toISOString().slice(0,10)}</td><td><StatusBadge status={resource.data.status} /></td></tr>)}</tbody></table>
+  </div>
+</BaseLayout>
+<style>
+  .resource-table{width:100%;min-width:60rem;border-collapse:collapse;font-size:.85rem}.resource-table th,.resource-table td{border:1px solid theme("colors.border-primary");padding:.7rem;text-align:left;vertical-align:top}.resource-table thead th{text-transform:uppercase;font-size:.7rem;letter-spacing:.04em}.resource-table tbody th{max-width:24rem}.resource-table a{text-decoration:underline}.resource-table p{font-weight:400;margin-top:.4rem}.resource-table code{display:block;font-size:.7rem;overflow-wrap:anywhere;margin-top:.3rem}
+</style>

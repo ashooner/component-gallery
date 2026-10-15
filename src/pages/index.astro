@@ -1,201 +1,27 @@
 ---
-import { parseMarkdown } from "../utils/markdown";
-
-import { Icon } from "astro-icon/components";
-import BaseLayout from "../layouts/BaseLayout.astro";
-import Card from "../components/Card.astro";
-import CTA from "../components/CTA.astro";
-import Hero from "../components/Hero.astro";
-
-import { fetchSvgMarkupForComponents } from "../utils/fetchSvgMarkup";
-
 import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Hero from "../components/Hero.astro";
+import InventoryCard from "../components/InventoryCard.astro";
+import CTA from "../components/CTA.astro";
 
-const components = await getCollection("components", ({ data }) => {
-  return data["Publish"] === true;
-});
-
-let recentComponents = await getCollection("components", ({ data }) => {
-  return data["Date updated"] && data["Publish"] === true;
-}).then((items) =>
-  items
-    .sort(
-      (a, b) =>
-        new Date(b.data["Date updated"]) - new Date(a.data["Date updated"])
-    )
-    .slice(0, 8)
-);
-
-const recentComponentsWithSvgMarkup =
-  await fetchSvgMarkupForComponents(recentComponents);
-
-const designSystems = await getCollection("designSystems", ({ data }) => {
-  return data["Publish"] === true;
-}).then((items) =>
-  items.sort(
-    (a, b) =>
-      new Date(b.data["Last reviewed"]) - new Date(a.data["Last reviewed"])
-  )
-);
-
-const recentDesignSystems = designSystems.slice(0, 8);
-
-const componentExamplesCount = await getCollection("componentExamples").then(
-  (items) => items.length
-);
-
-const formattedComponentExamplesCount = new Intl.NumberFormat().format(
-  componentExamplesCount
-);
+const components = await getCollection("components");
+const systems = await getCollection("designSystems");
+const examples = await getCollection("componentExamples");
+const resources = await getCollection("resources");
+const counts = Object.fromEntries(components.map(({ id }) => [id, examples.filter((example) => example.data.canonicalComponent === id).length]));
 ---
-
-<BaseLayout title="">
+<BaseLayout title="" description="A version-controlled higher-education component inventory with source-level API evidence.">
   <Hero isHomepage>
-    <span
-      >{components.length}&nbsp;components,<br />
-      {designSystems.length}&nbsp;design&nbsp;systems,<br />
-      {formattedComponentExamplesCount}&nbsp;examples.</span
-    >
-    <Fragment slot="controls">
-      <div class="p-[var(--grid-display-size)] pt-0 bg-background-primary">
-        <p
-          class="sm:max-w-[calc(var(--grid-display-size)*18)] text-lg lg:text-xl text-pretty variable-font-wdth-90 text-center mx-auto"
-        >
-          <em>The Component Gallery</em> is an up-to-date repository of
-          interface components based on examples from the world of <a
-            href="/design-systems"
-            class="underline decoration-[0.07em] underline-offset-[0.15em] decoration-inherit"
-            >design systems</a
-          >, designed to be a reference for anyone building user interfaces.
-        </p>
-      </div>
-    </Fragment>
+    <span>{components.length}&nbsp;concepts,<br />{systems.length}&nbsp;university systems,<br />{examples.length}&nbsp;verified implementations.</span>
+    <Fragment slot="controls"><div class="p-[var(--grid-display-size)] pt-0 bg-background-primary"><p class="max-w-3xl text-lg lg:text-xl text-pretty variable-font-wdth-90 text-center mx-auto"><em>The Higher-Ed Component Inventory</em> separates shared interface concepts from the exact APIs published by university design systems. It records evidence and uncertainty without turning missing documentation into “unsupported.”</p></div></Fragment>
   </Hero>
-
-  <div
-    class="col-span-full flex flex-wrap justify-between bg-background-primary border-fade-l border-fade-r p-4 shadow-border"
-  >
-    <h2 class="text-lg tracking-wide uppercase variable-font-wdth-83">
-      Components
-    </h2>
-    <CTA href="/components">View all</CTA>
-  </div>
-
-  <ul
-    role="list"
-    class="col-span-full grid grid-cols-subgrid gap-y-px border-fade-l border-fade-r"
-  >
-    {
-      recentComponentsWithSvgMarkup.map((component, index) => (
-        <Card
-          href={`/components/${component.data["Slug"]}`}
-          title={component.data["Name"]}
-          image={component.data["Image"][0]}
-          svgMarkup={component.data["svgMarkup"]}
-        >
-          {!!component.data["Other names"] && (
-            <p class="variable-font-wdth-90 text-sm mb-3 italic">
-              {component.data["Other names"]}
-            </p>
-          )}
-          <div
-            class="body-text body-text--tight variable-font-wdth-90 text-sm"
-            set:html={parseMarkdown(component.data["Description"])}
-          />
-        </Card>
-      ))
-    }
-  </ul>
-  <div
-    class="col-span-full flex flex-wrap justify-between bg-background-primary border-fade-l border-fade-r p-4 shadow-border"
-  >
-    <h2 class="text-lg tracking-wide uppercase variable-font-wdth-83">
-      Design systems
-    </h2>
-    <CTA href="/design-systems">View all</CTA>
-  </div>
-  <ul
-    role="list"
-    class="col-span-full grid grid-cols-subgrid gap-y-px border-fade-l border-fade-r"
-  >
-    {
-      recentDesignSystems.map((designSystem) => (
-        <Card
-          href={designSystem.data["URL"]}
-          title={designSystem.data["Name"]}
-          image={designSystem.data["Image"][0]}
-          tech={designSystem.data["Tech lookup"]}
-          features={designSystem.data["Features lookup"]}
-          data-name={designSystem.data["Name"]}
-          data-tech={
-            !!designSystem.data["Tech lookup"]?.length &&
-            designSystem.data["Tech lookup"].join(",")
-          }
-          data-features={
-            !!designSystem.data["Features lookup"]?.length &&
-            designSystem.data["Features lookup"].join(",")
-          }
-          data-platforms={[
-            designSystem.data["GitHub URL"] && "GitHub",
-            designSystem.data["Storybook URL"] && "Storybook",
-            designSystem.data["Figma URL"] && "Figma",
-          ]
-            .filter(Boolean)
-            .join(",")}
-          data-component-count={designSystem.data["Component examples count"]}
-          data-date={designSystem.data["Last reviewed"]}
-        >
-          <Fragment slot="header">
-            <div class="flex shrink-0 gap-2 relative top-0.5">
-              {!!designSystem.data["GitHub URL"] && (
-                <a
-                  href={designSystem.data["GitHub URL"]}
-                  class="transition-colors hover:text-text-highlight group"
-                >
-                  <span class="sr-only">
-                    {designSystem.data["Name"]} on GitHub
-                  </span>
-                  <Icon
-                    name="github"
-                    class="w-[0.9em] h-[0.9em] transition-transform duration-200 group-hover:scale-110"
-                  />
-                </a>
-              )}
-              {!!designSystem.data["Storybook URL"] && (
-                <a
-                  href={designSystem.data["Storybook URL"]}
-                  class="transition-colors hover:text-text-highlight group"
-                >
-                  <span class="sr-only">
-                    {designSystem.data["Name"]} on Storybook
-                  </span>
-                  <Icon
-                    name="storybook"
-                    class="w-[0.9em] h-[0.9em] transition-transform duration-200 group-hover:scale-110"
-                  />
-                </a>
-              )}
-              {!!designSystem.data["Figma URL"] && (
-                <a
-                  href={designSystem.data["Figma URL"]}
-                  class="transition-colors hover:text-text-highlight group"
-                >
-                  <span class="sr-only">
-                    {designSystem.data["Name"]} on Figma
-                  </span>
-                  <Icon
-                    name="figma"
-                    class="w-[0.9em] h-[0.9em] transition-transform duration-200 group-hover:scale-110"
-                  />
-                </a>
-              )}
-            </div>
-          </Fragment>
-          <p class="variable-font-wdth-90 text-sm">
-            {designSystem.data["Organisation"]}
-          </p>
-        </Card>
-      ))
-    }
-  </ul>
+  <div class="col-span-full flex justify-between bg-background-primary p-4 shadow-border"><h2 class="uppercase tracking-wide">Canonical concepts</h2><CTA href="/components">Browse concepts</CTA></div>
+  <ul class="col-span-full grid grid-cols-subgrid gap-px" role="list">{components.map((component) => <InventoryCard href={`/components/${component.data.slug}`} eyebrow="Canonical concept" title={component.data.name} description={component.data.purpose} tags={component.data.aliases} count={counts[component.id]} />)}</ul>
+  <div class="col-span-full flex justify-between bg-background-primary p-4 shadow-border"><h2 class="uppercase tracking-wide">Initial research systems</h2><CTA href="/design-systems">Browse systems</CTA></div>
+  <ul class="col-span-full grid grid-cols-subgrid gap-px" role="list">{systems.map((system) => <InventoryCard href={`/design-systems/${system.data.slug}`} eyebrow={system.data.university} title={system.data.name} description={`${system.data.library} · ${system.data.version}`} tags={system.data.technologies} count={examples.filter(({ data }) => data.designSystem === system.id).length} />)}</ul>
+  <section class="col-span-full grid grid-cols-12 gap-px bg-background-primary">
+    <div class="col-span-full lg:col-span-7 p-[var(--grid-display-size)] shadow-border"><h2 class="font-serif text-3xl">Evidence-first research</h2><p class="text-lg mt-4 max-w-2xl">Every implementation links to documentation or pinned source, records version or commit and retrieval date, and marks claims as verified, inferred, or unknown.</p><p class="mt-4"><a class="underline" href="/resources">Review {resources.length} research sources</a></p></div>
+    <div class="col-span-full lg:col-span-5 p-[var(--grid-display-size)] shadow-border"><h2 class="font-serif text-3xl">Inventory, not specification</h2><p class="text-lg mt-4">This dataset is descriptive. A future UK higher-education component specification belongs in a separate selection profile and is not implied by frequency or presence here.</p></div>
+  </section>
 </BaseLayout>

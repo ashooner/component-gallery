@@ -1,6 +1,7 @@
 import type { AstroIntegration } from "astro";
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "node:url";
 import { JSDOM, VirtualConsole } from "jsdom";
 
 // Fix for 'Could not parse CSS stylesheet' error
@@ -14,7 +15,8 @@ export default function generateRedirects(): AstroIntegration {
     name: "generate-redirects",
     hooks: {
       "astro:build:done": async ({ dir }) => {
-        const componentsDir = path.join(dir.pathname, "components");
+        const outputDir = fileURLToPath(dir);
+        const componentsDir = path.join(outputDir, "components");
         const redirects: { [key: string]: string } = {};
 
         const getHtmlFiles = (directory: string): string[] => {
@@ -82,7 +84,7 @@ export default function generateRedirects(): AstroIntegration {
         }
 
         // Write the redirects to the _redirects file
-        const redirectsFilePath = path.join(dir.pathname, "_redirects");
+        const redirectsFilePath = path.join(outputDir, "_redirects");
         const redirectsArray = Object.entries(redirects).map(
           ([from, to]) => `/components/${from} ${to} 301`,
         );

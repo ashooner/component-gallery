@@ -55,7 +55,11 @@ const { heading, id = "filter-dropdown" } = Astro.props;
           const content = filterDropdown.querySelector(".content");
           const isExpanded = button?.getAttribute("aria-expanded") === "true";
 
-          if (isExpanded && !filterDropdown.contains(event.target)) {
+          if (
+            isExpanded &&
+            event.target instanceof Node &&
+            !filterDropdown.contains(event.target)
+          ) {
             button.setAttribute("aria-expanded", "false");
             content?.setAttribute("inert", "");
           }

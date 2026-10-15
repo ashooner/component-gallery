@@ -1,0 +1,30 @@
+---
+interface Props {
+  href: string;
+  eyebrow: string;
+  title: string;
+  description: string;
+  tags?: string[];
+  count?: number;
+  [key: string]: unknown;
+}
+const { href, eyebrow, title, description, tags = [], count, ...rest } = Astro.props;
+---
+<li class="inventory-card col-span-full sm:col-span-6 lg:col-span-4" {...rest}>
+  <p class="text-xs uppercase tracking-wider text-text-secondary">{eyebrow}</p>
+  <div class="flex justify-between gap-4 items-baseline mt-2">
+    <h2 class="font-serif text-2xl"><a class="inventory-card__link" href={href}>{title}</a></h2>
+    {typeof count === "number" && <span class="font-mono text-xs">{count}</span>}
+  </div>
+  <p class="text-sm variable-font-wdth-90 mt-3">{description}</p>
+  {tags.length > 0 && <ul class="flex flex-wrap gap-1 mt-4" aria-label="Tags">
+    {tags.map((tag) => <li class="border border-dotted rounded px-1.5 py-1 text-xs">{tag}</li>)}
+  </ul>}
+</li>
+
+<style>
+  .inventory-card { position:relative; min-height:15rem; padding:1rem; background:theme("colors.background-primary"); box-shadow:0 0 0 1px theme("colors.border-primary"); transition:transform .2s, border-radius .2s, background-color .2s; }
+  .inventory-card:hover { transform:translate(4px,-4px); border-radius:.75rem; background:theme("colors.background-highlight"); z-index:1; }
+  .inventory-card__link::after { content:""; position:absolute; inset:0; }
+  .inventory-card ul { position:relative; z-index:2; }
+</style>

@@ -1,19 +1,18 @@
 {
-  "name": "component.gallery",
+  "name": "higher-ed-component-inventory",
   "type": "module",
   "version": "0.0.1",
   "scripts": {
+    "validate:data": "node scripts/validate-data.mjs",
     "build:astro": "astro build",
     "build:pagefind": "npx pagefind",
-    "build": "npm-run-all -s build:astro build:pagefind",
+    "build": "npm-run-all -s validate:data build:astro build:pagefind",
     "dev": "astro dev",
     "start": "astro dev",
     "preview": "astro preview",
     "astro": "astro"
   },
   "dependencies": {
-    "@11ty/eleventy-fetch": "^5.0.2",
-    "@ascorbic/airtable-loader": "^1.0.5",
     "@astrojs/mdx": "^4.0.0-beta.2",
     "@astrojs/preact": "^4.0.2",
     "@astrojs/sitemap": "^3.7.3",

@@ -1,130 +1,51 @@
 ---
-import { parseMarkdown } from "../utils/markdown";
-import { fetchSvgMarkupForComponents } from "../utils/fetchSvgMarkup";
-
+import { getCollection } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Hero from "../components/Hero.astro";
-import Badge from "../components/Badge.astro";
-import Card from "../components/Card.astro";
+import InventoryCard from "../components/InventoryCard.astro";
 import Select from "../components/Select.astro";
 
-import { getCollection } from "astro:content";
-
-const components = await getCollection("components", ({ data }) => {
-  return data["Publish"] === true;
-}).then((items) =>
-  items.sort((a, b) => a.data.Name.localeCompare(b.data.Name)),
-);
-
-const componentsWithSvgMarkup = await fetchSvgMarkupForComponents(components);
-const parsedComponents = await Promise.all(
-  componentsWithSvgMarkup.map(async (component) => ({
-    ...component,
-    data: {
-      ...component.data,
-      Description: await parseMarkdown(component.data["Description"]),
-    },
-  })),
-);
+const components = (await getCollection("components")).sort((a, b) => a.data.name.localeCompare(b.data.name));
+const examples = await getCollection("componentExamples");
+const counts = Object.fromEntries(components.map(({ id }) => [id, examples.filter((example) => example.data.canonicalComponent === id).length]));
 ---
-
-<BaseLayout title="Components">
+<BaseLayout title="Canonical concepts" description="Canonical higher-education component concepts, kept separate from source implementation APIs.">
   <Hero>
-    <span>Components</span>
+    <span>Canonical component concepts</span>
     <Fragment slot="controls">
-      <div class="flex lg:justify-end bg-background-primary">
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-background-primary p-3">
+        <p class="text-sm max-w-2xl">Concepts describe shared intent and anatomy. Source names, props, slots, states, and variants remain attached to implementations.</p>
         <Select label="Sort by:" id="sort-select">
           <option value="name">Name</option>
-          <option value="example-count">Example count</option>
+          <option value="example-count">Implementation count</option>
         </Select>
       </div>
     </Fragment>
   </Hero>
-
-  <ul
-    id="components"
-    role="list"
-    class="col-span-full grid grid-cols-subgrid gap-y-px border-fade-l border-fade-r"
-  >
-    {
-      parsedComponents.map((component, index) => (
-        <Card
-          href={`/components/${component.data["Slug"]}`}
-          title={component.data["Name"]}
-          image={component.data["Image"][0]}
-          svgMarkup={component.data["svgMarkup"]}
-          headingBadge={component.data["Examples count"]}
-          data-name={component.data["Name"]}
-          data-example-count={component.data["Examples count"]}
-          lazyLoadImage={index > 3}
-        >
-          <Fragment slot="header">
-            <Badge text={component.data["Examples count"]} />
-          </Fragment>
-          {!!component.data["Other names"] && (
-            <p class="variable-font-wdth-90 text-sm mb-3 italic">
-              {component.data["Other names"]}
-            </p>
-          )}
-          <div
-            class="body-text body-text--tight variable-font-wdth-90 text-sm"
-            set:html={component.data["Description"]}
-          />
-        </Card>
-      ))
-    }
+  <ul id="components" class="col-span-full grid grid-cols-subgrid gap-px" role="list">
+    {components.map((component) => <InventoryCard
+      href={`/components/${component.data.slug}`}
+      eyebrow={`${component.data.emoji} Canonical concept`}
+      title={component.data.name}
+      description={component.data.purpose}
+      tags={component.data.aliases}
+      count={counts[component.id]}
+      data-name={component.data.name}
+      data-example-count={counts[component.id]}
+    />)}
   </ul>
   <script>
-    import { transitionDOMUpdate } from "../utils/viewTransitions";
-    document.addEventListener("DOMContentLoaded", () => {
-      const sortSelect = document.getElementById("sort-select");
-      const componentsList = document.getElementById("components");
-
-      if (!sortSelect || !componentsList) {
-        return;
-      }
-
-      const componentsItems = componentsList.querySelectorAll(":scope > li");
-
-      const applySorting = (sort: string) => {
-        const itemsArray = Array.from(componentsItems);
-        itemsArray.sort((a, b) => {
-          if (sort === "name") {
-            return a
-              .getAttribute("data-name")
-              .localeCompare(b.getAttribute("data-name"));
-          }
-
-          if (sort === "example-count") {
-            return (
-              b.getAttribute("data-example-count") -
-              a.getAttribute("data-example-count")
-            );
-          }
-        });
-        itemsArray.forEach((item) => componentsList.appendChild(item));
-      };
-
-      const loadFiltersFromQueryString = () => {
-        const url = new URL(window.location);
-        const sort = url.searchParams.get("sort") || "name";
-
-        sortSelect.value = sort;
-
-        return { sort };
-      };
-
-      sortSelect.addEventListener("change", () => {
-        const sort = sortSelect.value;
-        transitionDOMUpdate(() => {
-          applySorting(sort);
-        });
-      });
-
-      const { sort } = loadFiltersFromQueryString();
-      transitionDOMUpdate(() => {
-        applySorting(sort);
-      });
-    });
+    const select = document.querySelector<HTMLSelectElement>("#sort-select");
+    const list = document.querySelector<HTMLUListElement>("#components");
+    const sort = () => {
+      if (!select || !list) return;
+      const items = Array.from(list.children) as HTMLElement[];
+      items.sort((a, b) => select.value === "example-count"
+        ? Number(b.dataset.exampleCount) - Number(a.dataset.exampleCount)
+        : (a.dataset.name ?? "").localeCompare(b.dataset.name ?? ""));
+      items.forEach((item) => list.append(item));
+      const url = new URL(location.href); url.searchParams.set("sort", select.value); history.replaceState({}, "", url);
+    };
+    if (select) { select.value = new URL(location.href).searchParams.get("sort") ?? "name"; select.addEventListener("change", sort); sort(); }
   </script>
 </BaseLayout>

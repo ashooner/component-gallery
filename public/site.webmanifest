@@ -1,6 +1,6 @@
 {
-  "name": "The Component Gallery",
-  "short_name": "Components",
+  "name": "Higher-Ed Component Inventory",
+  "short_name": "Higher-Ed Components",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",

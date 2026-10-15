@@ -1,1 +1,1 @@
-Sitemap: https://component.gallery/sitemap-index.xml
+# Add a Sitemap directive when SITE_URL is configured for a future deployment.

@@ -1,43 +1,56 @@
-<p align="center">
-  <a href="https://component.gallery">
-    <img alt="" src="https://github.com/inbn/component-gallery/raw/main/public/favicon-96x96.png" width="96" />
-  </a>
-</p>
-<h1 align="center">
-  The Component Gallery
-</h1>
+# Higher-Ed Component Inventory
 
-This project is built with [Astro](https://astro.build/).
+An Astro adaptation of [The Component Gallery](https://github.com/inbn/component-gallery) for evidence-led research into higher-education design systems.
 
-## 🚀 Quick start
+The inventory deliberately separates:
 
-1. **Create .env file**
+- canonical concepts: shared purpose, aliases, anatomy, and relationships;
+- design systems: universities, libraries, technologies, versions, and documentation;
+- component examples: actual source implementations and their exact APIs;
+- resources: documentation, repositories, integrations, versions/commits, retrieval dates, and evidence status.
 
-   Duplicate the file `.env.example` in the root of the project and call it `.env`. You'll need to add values for `AIRTABLE_BASE_ID` and `AIRTABLE_TOKEN`.
+Variant dimensions, named presets, states, responsive behavior, conditional requirements, and composition constraints are separate fields. Missing documentation is recorded as `unknown`, never assumed to mean unsupported.
 
-   **IMPORTANT NOTE:** The full Airtable database this project uses is private, but there’s an example with enough data to get started with here: https://airtable.com/shrSIQXYkS0mo53jY (click the 'Copy base' link in the top right to get your own version).
+This is descriptive research. A future UK higher-education component specification should be maintained as a separate selection profile.
 
-1. **Install dependencies**
+## Data
 
-   ```sh
-   npm install
-   ```
+Version-controlled records are in [`src/data`](src/data):
 
-1. **Start developing.**
+- `components.json`
+- `design-systems.json`
+- `component-examples.json`
+- `resources.json`
 
-   ```sh
-   npm start
-   ```
+Astro collection schemas in `src/content/config.ts` validate every record during a build. `scripts/validate-data.mjs` also verifies identifiers and cross-collection references.
 
-## 🧞 Commands
+## Development
 
-All commands are run from the root of the project, from a terminal:
+Requires the Node version in `.nvmrc`.
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+```sh
+npm install
+npm run validate:data
+npm run dev
+```
+
+Build the production site and Pagefind search index with:
+
+```sh
+npm run build
+```
+
+No Airtable credentials or other environment variables are required.
+
+## Initial research scope
+
+- The Ohio State University — Buckeye UX (BUX)
+- Yale University — YaleSites Component Library
+- University of Illinois Urbana-Champaign — Illinois Web Toolkit
+- University of Maryland — UMD Design System
+
+The initial concepts are Card, Hero, Accordion, Navigation, and Image + Text where primary sources expose verified implementations. Planned later research includes Missouri, Texas, Louisville, Stanford, Emory, and Mississippi State, organized into SEC, Kentucky-region, and aspirational groups.
+
+## Attribution and licensing
+
+This repository is adapted from `inbn/component-gallery`. The inspected upstream repository does not contain an explicit license file. Upstream attribution is retained, and this adaptation does not claim to grant a new license for upstream material. Source component libraries and their documentation remain subject to their respective terms.
